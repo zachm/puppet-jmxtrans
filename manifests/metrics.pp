@@ -14,6 +14,8 @@
 # $jmx_password         - JMX password (if there is one)  Optional.
 # $ganglia              - host:port of Ganglia gmond.  Optional.
 # $ganglia_group_name   - Ganglia metrics group.  Optional.
+# $ganglia_settings     - A hash of any extra ganglia output writer settings.
+#                         See: https://github.com/jmxtrans/jmxtrans/wiki/GangliaWriter.
 # $graphite             - host:port of Graphite server  Optional.
 # $graphite_root_prefix - rootPrefix for Graphite.  Optional.
 # $outfile              - local file path in which to save metric query results.  Optional.
@@ -26,6 +28,7 @@ define jmxtrans::metrics(
     $jmx_password         = undef,
     $ganglia              = undef,
     $ganglia_group_name   = undef,
+    $ganglia_settings     = undef,
     $graphite             = undef,
     $graphite_root_prefix = undef,
     $outfile              = undef
