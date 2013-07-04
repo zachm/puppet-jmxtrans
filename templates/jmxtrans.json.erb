@@ -1,87 +1,66 @@
-<%
+<% (jmx_host, jmx_port) = jmx.split(':') -%>
 
-(jmx_host, jmx_port) = jmx.split(':')
-
-# Build output writer json strings
-# from the outfile, ganglia, and/or
-# graphite variables.
-
-output_writers = []
-
-if @outfile
-  output_writers.push("{
-        \"@class\" : \"com.googlecode.jmxtrans.model.output.KeyOutWriter\",
-        \"settings\" : {
-          \"outputFile\" : \"#{outfile}\"
-        }
-      }")
-end
-
-if @ganglia
-  (ganglia_host, ganglia_port) = ganglia.split(':') if @ganglia
-
-  ganglia_output_writer = "{
-        \"@class\" : \"com.googlecode.jmxtrans.model.output.GangliaWriter\",
-        \"settings\"  : {
-          \"host\"      : \"#{ganglia_host}\",
-          \"port\"      : #{ganglia_port}"
-  ganglia_output_writer += ",\n          \"groupName\" : \"#{ganglia_group_name}\"" if @ganglia_group_name
-  # render any extra ganglia settings
-  if (@ganglia_settings)
-    @ganglia_settings.each_pair do |key, value|
-      ganglia_output_writer += ",\n          \"#{key}\" : \"#{value}\""
-    end
-  end
-  ganglia_output_writer += "\n        }\n      }"
-  output_writers.push(ganglia_output_writer)
-end
-
-if @graphite
-  (graphite_host, graphite_port) = graphite.split(':')
-  graphite_output_writer = "{
-        \"@class\" : \"com.googlecode.jmxtrans.model.output.GraphiteWriter\",
-        \"settings\"   : {
-          \"host\"       : \"#{graphite_host}\",
-          \"port\"       : #{graphite_port}"
-  graphite_output_writer += ",\n          \"rootPrefix\" : \"#{graphite_root_prefix}\"" if @graphite_root_prefix
-  graphite_output_writer += "\n        }\n      }"
-  output_writers.push(graphite_output_writer)
-end
-
-# Output the JSON string.
--%>
-
-{ "servers" : [ {
-
-  "host"  : "<%= jmx_host %>",
-  "port"  : <%= jmx_port %>,
+{ "servers":
+  [ { "host": "<%= jmx_host %>"
+    , "port": <%= jmx_port %>
 <% if @jmx_alias -%>
-  "alias" : "<%= @jmx_alias %>",
+    , "alias": "<%= @jmx_alias %>"
 <% end -%>
 <% if @jmx_username -%>
-  "username" : "<%= @jmx_username %>",
+    , "username": "<%= @jmx_username %>"
 <% end -%>
 <% if @jmx_password -%>
-  "password" : "<%= @jmx_password %>",
+    , "password": "<%= @jmx_password %>"
 <% end -%>
-  "queries" :
-  [
-<% # loop over each query and output it with each configured output_writer -%>
-<% queries.each_with_index do |query, index| -%>
-<% unless index == 0 -%>
-    ,
-<% end -%>
-    {
-      "obj"  : "<%= query["obj"] %>",
-      "attr" : [ <%= query['attr'].map {|t| "\""+t.to_s+"\""}.join(', ') %> ],
-<% if query.has_key? "resultAlias" -%>
-      "resultAlias" : "<%= query["resultAlias"] %>",
-<% end -%>
-      "outputWriters" : [
-      <%= output_writers.join(",\n      ") %>
+    , "queries":
+      [
+<% # each attr gets it own obj chunk because it could have a different slope and unit. -%>
+<% @objects.each_with_index do |object, obj_index| -%>
+<%   object['attrs'].keys.sort.each_with_index do |attr_name, attr_index| -%>
+      <% if obj_index == 0 && attr_index == 0 -%>  <% else -%>, <% end -%>{ "obj": "<%= object["name"] %>"
+        , "attr": [ "<%= attr_name %>" ]
+<%     if object.has_key? "resultAlias" -%>
+        , "resultAlias": "<%= object["resultAlias"] %>"
+<%     end -%>
+        , "outputWriters":
+          [
+<%     if @outfile -%>
+            { "@class": "com.googlecode.jmxtrans.model.output.KeyOutWriter"
+            , "settings":
+              { "outputFile": "<%= @outfile %>" }
+            }
+<%     end -%>
+<%     if @ganglia -%>
+<%       (ganglia_host, ganglia_port) = @ganglia.split(':') -%>
+          <% if @outfile -%>, <% else -%>  <% end -%>{ "@class" : "com.googlecode.jmxtrans.model.output.GangliaWriter"
+            , "settings":
+              { "host": "<%= ganglia_host %>"
+              , "port": <%= ganglia_port %>
+              , "units": "<%= object['attrs'][attr_name]['units'] %>"
+              , "slope": "<%= object['attrs'][attr_name]['slope'].upcase %>"
+<%       if @ganglia_group_name -%>
+              , "groupName": "<%= ganglia_group_name %>"
+<%       end -%>
+              }
+            }
+<%     end -%>
+<%     if @graphite -%>
+<%       (graphite_host, graphite_port) = @graphite.split(':') -%>
+          <% if @outfile || @ganglia -%>, <% else -%>  <% end -%>{ "@class" : "com.googlecode.jmxtrans.model.output.GraphiteWriter"
+            , "settings":
+              { "host": "<%= graphite_host %>"
+              , "port": <%= graphite_port %>"
+<%       if @graphite_root_prefix -%>
+              , "rootPrefix": "<%= @graphite_root_prefix %>"
+<%       end -%>
+              }
+            }
+<%     end -%>
+          ]
+        }
+<%   end # object['attrs'].keys.sort.each_with_index -%>
+<% end # @objects.each_with_index -%>
       ]
     }
-<% end # queries.each_with_index -%>
   ]
-
-} ] }
+}

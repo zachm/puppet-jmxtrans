@@ -13,4 +13,3 @@ class jmxtrans {
         require => Package['jmxtrans'],
     }
 }
-
