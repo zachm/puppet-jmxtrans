@@ -7,8 +7,8 @@
 # installs to monitor this machine.  See jmxtrans::metrics::jvm for an exmple.
 #
 # == Parameters
-# $jmx                  - host:port of JMX to query (required)
-# $objects              - array of hashes of the form:
+# $jmx                  - host:port of JMX to query.
+# $objects              - array of hashes of the following form.  See READEME.md for more info.
 #   [
 #       {
 #           "name"        => "JMX object name",
@@ -21,26 +21,16 @@
 #           }
 #       }
 #   ]
-# --resultAlias is optional
-# --units is only required for ganglia
-# ---Displayed with the graph to give context.  Nothing is worse than looking at
-# ---a graph and not knowing if something is in seconds, milliseconds, or
-# ---microseconds.
-# --slope is only required for ganglia and is 'both', 'positive', or 'negative'
-# ---See http://codeblog.majakorpi.net/post/16281432462/ganglia-xml-slope-attribute
-# ---for more information including the rrd-beginners link if the concept sitll
-# ---isn't clear.
-# --Yes, the hash after attribute name could be empty.
-# --No, we don't support replacing it with an array of names.
-# $jmx_alias            - Server alias name.  Optional.
+#
+# $jmx_alias            - Server alias name.              Optional.
 # $jmx_username         - JMX username (if there is one)  Optional.
 # $jmx_password         - JMX password (if there is one)  Optional.
-# $ganglia              - host:port of Ganglia gmond.  Optional.
-# $ganglia_group_name   - Ganglia metrics group.  Optional.
-# $graphite             - host:port of Graphite server  Optional.
-# $graphite_root_prefix - rootPrefix for Graphite.  Optional.
-# $outfile              - local file path in which to save metric query results.
-#                           Optional.
+# $ganglia              - host:port of Ganglia gmond.     Optional.
+# $ganglia_group_name   - Ganglia metrics group.          Optional.
+# $graphite             - host:port of Graphite server    Optional.
+# $graphite_root_prefix - rootPrefix for Graphite.        Optional.
+# $outfile              - local file path in which to save metric query results.  Optional.
+# $json_dir             - path to jmxtrans JSON config directory.  Default: /etc/jmxtrans.
 #
 define jmxtrans::metrics(
     $jmx,
@@ -52,12 +42,13 @@ define jmxtrans::metrics(
     $ganglia_group_name   = undef,
     $graphite             = undef,
     $graphite_root_prefix = undef,
-    $outfile              = undef
+    $outfile              = undef,
+    $json_dir             = '/etc/jmxtrans',
 )
 {
     include jmxtrans
 
-    file { "/etc/jmxtrans/${title}.json":
+    file { "${json_dir}/${title}.json":
         content => template('jmxtrans/jmxtrans.json.erb'),
         notify  => Service['jmxtrans'],
         require => Package['jmxtrans'],

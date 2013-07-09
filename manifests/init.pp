@@ -3,13 +3,14 @@
 # The jmxtrans::metrics define includes this class, so you probably don't
 # need to use it directly.
 #
+# == Parameters
 class jmxtrans {
     package { 'jmxtrans':
-        ensure => 'installed',
+        ensure  => 'installed',
     }
     service { 'jmxtrans':
-        ensure => 'running',
-        enable => true,
+        ensure  => 'running',
+        enable  => true,
         require => Package['jmxtrans'],
     }
 }

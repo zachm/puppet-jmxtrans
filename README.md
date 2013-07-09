@@ -20,7 +20,41 @@ to a single JVM bundled together.  See jmxtrans
 [best practices](https://github.com/jmxtrans/jmxtrans/wiki/BestPractices)
 for more information.
 
-# Usage
+The ```objects``` parameter to jmxtrans::metrics is an array of hashes of the form:
+
+```puppet
+objects => [
+    {
+        'name'        => 'JMX.object.name',
+        'resultAlias' => 'pretty alias for JMX name', # optional
+        # attrs is a hash of JMX attributes under this JMX object
+        # with settings specific to this attribute.
+        # Most settings will only be relevant to specific output writers.
+        # Each available option is described here:
+        'attrs'       => {
+            'JMX.attribute.name' => {
+                # Ganglia Options.  See:
+                # https://github.com/jmxtrans/jmxtrans/wiki/GangliaWriter#example-configuration
+
+                # Slope must be one of ```both```, ```positive```, or ```negative```.
+                # See http://codeblog.majakorpi.net/post/16281432462/ganglia-xml-slope-attribute
+                'slope'       => 'both|positive|negative',
+                'units'       => 'unit name',
+                'tmax'        => 'seconds value',
+                'dmax'        => 'seconds value',
+                'sendMetadata => 'frequency value',
+            }
+        }
+    }
+]
+```
+Notes:
+
+- Yes, the hash after attribute name could be empty.
+- No, we don't support replacing it with an array of names.
+
+# Usage Examples
+
 ## Hadoop NameNode with multiple jmxtrans outputs
 
 Query a Hadoop NameNode for some stats, and write the metrics to
@@ -34,14 +68,23 @@ jmxtrans::metrics { 'hadoop-hdfs-namenode':
     ganglia_group_name    => 'hadoop',
     graphite              => '127.0.0.1:2003',
     graphite_root_prefix  => 'hadoop',
-    queries => [
+    objects              => [
         {
-            'obj'    => 'Hadoop:service=NameNode,name=NameNodeActivity',
-            'attr'   => ['FileInfoOps', 'FilesCreated', 'FilesDeleted'],
+            'name'           =>  'Hadoop:service=NameNode,name=NameNodeActivity',
+            'resultAlias'    => 'hadoop.namenode',
+            'attrs'          => {
+                'FileInfoOps'  => { 'units' => 'operations', 'slope' => 'positive' },
+                'FilesCreated' => { 'units' => 'creations',  'slope' => 'positive' },
+                'FilesDeleted' => { 'units' => 'deletions',  'slope' => 'positive' },
+            }
         },
         {
-            'obj'    => 'Hadoop:service=NameNode,name=FSNamesystem',
-            'attr'   => ['BlockCapacity', 'BlocksTotal', 'TotalFiles'],
+            'name' => 'Hadoop:service=NameNode,name=FSNamesystem',
+            'attrs => {
+                'BlockCapacity' => { 'units' => 'blocks', 'slope' => 'both' },
+                'BlocksTotal'   => { 'units' => 'blocks', 'slope' => 'both' },
+                'TotalFiles'    => { 'units' => 'files',  'slope' => 'both' },
+            }
         },
     ],
 }
@@ -52,50 +95,62 @@ jmxtrans::metrics { 'hadoop-hdfs-namenode':
 ```puppet
 include jmxtrans
 
-# Since we have multiple hosts sharing the same queries,
-# we define a $jmx_kafka_queries variable to hold them.
-# This will be passed as the queries parameter to each Kafka host.
-$jmx_kafka_queries = [
+# Since we have multiple hosts sharing the same objects,
+# we define a $jmx_kafka_objects variable to hold them.
+# This will be passed as the objects parameter to each Kafka host.
+
+$jmx_kafka_objects = [
     {
-        'obj'    => 'kafka:type=kafka.BrokerAllTopicStat',
-        'attr'   => [ 'BytesIn', 'BytesOut', 'FailedFetchRequest', 'FailedProduceRequest', 'MessagesIn' ]
+        'name'   => 'kafka:type=kafka.BrokerAllTopicStat',
+        'attrs   => {
+            'BytesIn'              => { 'units' => 'bytes',    'slope' => 'positive' },
+            'BytesOut'             => { 'units' => 'bytes',    'slope' => 'positive' },
+            'FailedFetchRequest'   => { 'units' => 'requests', 'slope' => 'positive' },
+            'FailedProduceRequest' => { 'units' => 'requests', 'slope' => 'positive' },
+            'MessagesIn'           => { 'units' => 'messages', 'slope' => 'positive' },
+        }
     },
     {
-        'obj'    => 'kafka:type=kafka.LogFlushStats',
-        'attr'   => [ 'AvgFlushMs', 'FlushesPerSecond', 'MaxFlushMs', 'NumFlushes', 'TotalFlushMs' ]
+        'name'   => 'kafka:type=kafka.LogFlushStats',
+        'attrs'  => {
+            'FlushesPerSecond' => { 'units' => 'flushes' }, # 'both' is ganglia default slope value. Leaving it off here.
+            'NumFlushes'       => { 'units' => 'flushes', slope => 'positive' },
+            'AvgFlushMs'       => { 'units' => 'ms' },
+            'MaxFlushMs'       => { 'units' => 'ms' },
+            'TotalFlushMs'     => { 'units' => 'ms', 'slope' => 'positive' },
+        }
     },
     {
-        'obj'    => 'kafka:type=kafka.SocketServerStats',
-        'attr'   => [
-            'AvgFetchRequestMs',
-            'AvgProduceRequestMs',
-            'BytesReadPerSecond',
-            'BytesWrittenPerSecond',
-            'FetchRequestsPerSecond',
-            'MaxFetchRequestMs',
-            'MaxProduceRequestMs',
-            'NumFetchRequests',
-            'NumProduceRequests',
-            'ProduceRequestsPerSecond',
-            'TotalBytesRead',
-            'TotalBytesWritten',
-            'TotalFetchRequestMs',
-            'TotalProduceRequestMs'
-        ]
+        'name'   => 'kafka:type=kafka.SocketServerStats',
+        'attrs'  => {
+            'BytesReadPerSecond'       => { 'units' => 'bytes'},
+            'BytesWrittenPerSecond'    => { 'units' => 'bytes'},
+
+            'ProduceRequestsPerSecond' => { 'units' => 'requests'},
+            'AvgProduceRequestMs'      => { 'units' => 'requests'},
+            'MaxProduceRequestMs'      => { 'units' => 'requests'},
+            'TotalProduceRequestMs'    => { 'units' => 'ms' }
+
+            'FetchRequestsPerSecond'   => { 'units' => 'requests' },
+            'AvgFetchRequestMs'        => { 'units' => 'ms' },
+            'MaxFetchRequestMs'        => { 'units' => 'ms' },
+            'TotalFetchRequestMs'      => { 'units' => 'ms' },
+        }
     }
+
 ]
 
-# query kafka1 for its JMX metrics
+# query kafka1 broker for its JMX metrics
 jmxtrans::metrics { 'kafka1':
     jmx     => 'kafka1:9999',
     ganglia => '192.168.10.50:8469',
-    queries => $jmx_kafka_queries,
+    objects => $jmx_kafka_objects,
 }
 
-# query kafka2 for its JMX metrics
+# query kafka2 broker for its JMX metrics
 jmxtrans::metrics { 'kafka2':
     jmx     => 'kafka2:9999',
     ganglia => '192.168.10.50:8469',
-    queries => $jmx_kafka_queries,
+    objects => $jmx_kafka_objects,
 }
 ```
