@@ -43,6 +43,7 @@ valid_ganglia_settings = ['slope', 'units', 'tmax', 'dmax', 'sendMetadata']
               , "port": <%= ganglia_port %>
 <%       object['attrs'][attr_name].keys.select { |key| valid_ganglia_settings.include? key }.sort.each do |key| -%>
 <%         value = object['attrs'][attr_name][key] -%>
+<%         value.upcase! if key == 'slope'         -%>
            <% # render each key: value pair.  If value is an integer, then render it without enclosing quotes. -%>
               , "<%= key %>": <%= (value.to_i.to_s == value) ? value : "\"#{value}\"" %>
 <%       end # each key -%>
