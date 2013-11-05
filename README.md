@@ -27,6 +27,7 @@ objects => [
     {
         'name'        => 'JMX.object.name',
         'resultAlias' => 'pretty alias for JMX name', # optional
+        'typeNames'   => ['name'], # optional
         # attrs is a hash of JMX attributes under this JMX object
         # with settings specific to this attribute.
         # Most settings will only be relevant to specific output writers.

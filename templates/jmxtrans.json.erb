@@ -32,7 +32,11 @@ valid_ganglia_settings = ['slope', 'units', 'tmax', 'dmax', 'sendMetadata']
 <%     if @outfile -%>
             { "@class": "com.googlecode.jmxtrans.model.output.KeyOutWriter"
             , "settings":
-              { "outputFile": "<%= @outfile %>" }
+              { "outputFile": "<%= @outfile %>"
+<%       if object.has_key? 'typeNames' -%>
+              , "typeNames": <%= object['typeNames'].inspect %>
+<%       end -%>
+              }
             }
 <%     end -%>
 <%     if @ganglia -%>
@@ -41,10 +45,13 @@ valid_ganglia_settings = ['slope', 'units', 'tmax', 'dmax', 'sendMetadata']
             , "settings":
               { "host": "<%= ganglia_host %>"
               , "port": <%= ganglia_port %>
+<%       if object.has_key? 'typeNames' -%>
+              , "typeNames": <%= object['typeNames'].inspect %>
+<%       end -%>
 <%       object['attrs'][attr_name].keys.select { |key| valid_ganglia_settings.include? key }.sort.each do |key| -%>
 <%         value = object['attrs'][attr_name][key] -%>
 <%         value.upcase! if key == 'slope'         -%>
-           <% # render each key: value pair.  If value is an integer, then render it without enclosing quotes. -%>
+<%  # render each key: value pair.  If value is an integer, then render it without enclosing quotes. -%>
               , "<%= key %>": <%= (value.to_i.to_s == value) ? value : "\"#{value}\"" %>
 <%       end # each key -%>
 <%       if @ganglia_group_name -%>
@@ -59,6 +66,9 @@ valid_ganglia_settings = ['slope', 'units', 'tmax', 'dmax', 'sendMetadata']
             , "settings":
               { "host": "<%= graphite_host %>"
               , "port": <%= graphite_port %>"
+<%       if object.has_key? 'typeNames' -%>
+              , "typeNames": <%= object['typeNames'].inspect %>
+<%       end -%>
 <%       if @graphite_root_prefix -%>
               , "rootPrefix": "<%= @graphite_root_prefix %>"
 <%       end -%>

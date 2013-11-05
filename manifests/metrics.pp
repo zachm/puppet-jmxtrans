@@ -13,6 +13,7 @@
 #       {
 #           "name"        => "JMX object name",
 #           "resultAlias" => "pretty alias for JMX name",
+#           "typeNames"   => ["name"], # this is optional
 #           "attrs"       => {
 #               "attribute name" => {
 #                   "units" => "unit name",
