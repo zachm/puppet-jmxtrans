@@ -6,11 +6,24 @@
 #
 # == Parameters
 # $title          - host:port of JMX to query (required)
-define jmxtrans::metrics::jvm() {
+# $ganglia        - $ganglia parameter to pass to jmxtrans::metrics
+# $graphite       - $graphite parameter to pass to jmxtrans::metrics
+# $outfile        - $outfile parameter to pass to jmxtrans::metrics
+#
+define jmxtrans::metrics::jvm(
+    $ganglia     = undef,
+    $graphite    = undef,
+    $outfile     = undef,
+)
+{
     jmxtrans::metrics { "${title}-jvm-metrics":
-        jmx                => "$title",
-        ganglia_group_name => 'jvm_memory',
-        objects            => [
+        jmx                  => "$title",
+        outfile              => $outfile,
+        ganglia              => $ganglia,
+        ganglia_group_name   => 'jvm_memory',
+        graphite             => $graphite,
+        graphite_root_prefix => 'jvm_memory',
+        objects              => [
             {
                 'name'        => 'java.lang:type=Memory',
                 'resultAlias' => 'memory',
