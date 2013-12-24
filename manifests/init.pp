@@ -21,8 +21,9 @@ class jmxtrans(
     }
 
     service { 'jmxtrans':
-        ensure  => 'running',
-        enable  => true,
-        require => Package['jmxtrans'],
+        ensure    => 'running',
+        enable    => true,
+        require   => Package['jmxtrans'],
+        subscribe => File['/etc/default/jmxtrans'],
     }
 }
