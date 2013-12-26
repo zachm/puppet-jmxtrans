@@ -4,12 +4,12 @@
 # need to use it directly.
 #
 # == Parameters
-# $run_interval - seconds between runs of jmx queries.  Default: 60
-# $log_level    - level at which to log jmxtrans messages.  Default: 'debug'
+# $run_interval - seconds between runs of jmx queries.  Default: 15
+# $log_level    - level at which to log jmxtrans messages.  Default: 'info'
 #
 class jmxtrans(
-    $run_interval = 60,
-    $log_level    = 'debug',
+    $run_interval = 15,
+    $log_level    = 'info',
 )
 {
     package { 'jmxtrans':
