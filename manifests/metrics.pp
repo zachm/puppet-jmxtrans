@@ -49,9 +49,13 @@ define jmxtrans::metrics(
 {
     include jmxtrans
 
+    file { $json_dir:
+        ensure => 'directory',
+    }
+
     file { "${json_dir}/${title}.json":
         content => template('jmxtrans/jmxtrans.json.erb'),
         notify  => Service['jmxtrans'],
-        require => Package['jmxtrans'],
+        require => [ Package['jmxtrans'], File[$json_dir] ]
     }
 }
