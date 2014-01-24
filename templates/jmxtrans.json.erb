@@ -65,7 +65,7 @@ valid_ganglia_settings = ['slope', 'units', 'tmax', 'dmax', 'sendMetadata']
           <% if @outfile || @ganglia -%>, <% else -%>  <% end -%>{ "@class" : "com.googlecode.jmxtrans.model.output.GraphiteWriter"
             , "settings":
               { "host": "<%= graphite_host %>"
-              , "port": <%= graphite_port %>"
+              , "port": <%= graphite_port %>
 <%       if object.has_key? 'typeNames' -%>
               , "typeNames": <%= object['typeNames'].inspect %>
 <%       end -%>
