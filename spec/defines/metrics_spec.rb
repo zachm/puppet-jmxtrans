@@ -25,3 +25,13 @@ describe 'jmxtrans::metrics' do
   it { should contain_class('jmxtrans') }
   it { should contain_jmxtrans__metrics(service) }
 end
+
+describe 'jmxtrans::metrics::jvm' do
+  let(:title) { service }
+  let(:params) { { :jmx => jmx,
+                   :group_prefix => "#{service}." } }
+
+  it { should contain_file("/etc/jmxtrans/#{service}-jvm-metrics.json") }
+  it { should contain_class('jmxtrans') }
+  it { should contain_jmxtrans__metrics__jvm(service) }
+end
