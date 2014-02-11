@@ -10,10 +10,15 @@
 class jmxtrans(
     $run_interval = 15,
     $log_level    = 'info',
+    $json_dir     = '/etc/jmxtrans',
 )
 {
     package { 'jmxtrans':
         ensure  => 'installed',
+    }
+
+    file { $json_dir:
+        ensure => 'directory',
     }
 
     file { '/etc/default/jmxtrans':

@@ -44,14 +44,10 @@ define jmxtrans::metrics(
     $graphite             = undef,
     $graphite_root_prefix = undef,
     $outfile              = undef,
-    $json_dir             = '/etc/jmxtrans',
 )
 {
     include jmxtrans
-
-    file { $json_dir:
-        ensure => 'directory',
-    }
+    $json_dir = $jmxtrans::json_dir
 
     file { "${json_dir}/${title}.json":
         content => template('jmxtrans/jmxtrans.json.erb'),
