@@ -65,12 +65,27 @@ valid_ganglia_settings = ['slope', 'units', 'tmax', 'dmax', 'sendMetadata']
           <% if @outfile || @ganglia -%>, <% else -%>  <% end -%>{ "@class" : "com.googlecode.jmxtrans.model.output.GraphiteWriter"
             , "settings":
               { "host": "<%= graphite_host %>"
-              , "port": <%= graphite_port %>"
+              , "port": <%= graphite_port %>
 <%       if object.has_key? 'typeNames' -%>
               , "typeNames": <%= object['typeNames'].inspect %>
 <%       end -%>
 <%       if @graphite_root_prefix -%>
               , "rootPrefix": "<%= @graphite_root_prefix %>"
+<%       end -%>
+              }
+            }
+<%     end -%>
+<%     if @statsd -%>
+<%       (statsd_host, statsd_port) = @statsd.split(':') -%>
+          <% if @outfile || @ganglia -%>, <% else -%>  <% end -%>{ "@class" : "com.googlecode.jmxtrans.model.output.StatsDWriter"
+            , "settings":
+              { "host": "<%= statsd_host %>"
+              , "port": <%= statsd_port %>
+<%       if object.has_key? 'typeNames' -%>
+              , "typeNames": <%= object['typeNames'].inspect %>
+<%       end -%>
+<%       if @statsd_root_prefix -%>
+              , "rootPrefix": "<%= @statsd_root_prefix %>"
 <%       end -%>
               }
             }

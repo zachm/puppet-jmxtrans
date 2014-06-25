@@ -30,6 +30,8 @@
 # $ganglia_group_name   - Ganglia metrics group.          Optional.
 # $graphite             - host:port of Graphite server    Optional.
 # $graphite_root_prefix - rootPrefix for Graphite.        Optional.
+# $statsd               - host:port of statsd server      Optional.
+# $statsd_root_prefix   - rootPrefix for statsd.          Optional.
 # $outfile              - local file path in which to save metric query results.  Optional.
 # $json_dir             - path to jmxtrans JSON config directory.  Default: /etc/jmxtrans.
 #
@@ -43,6 +45,8 @@ define jmxtrans::metrics(
     $ganglia_group_name   = undef,
     $graphite             = undef,
     $graphite_root_prefix = undef,
+    $statsd               = undef,
+    $statsd_root_prefix   = undef,
     $outfile              = undef,
     $json_dir             = '/etc/jmxtrans',
 )
