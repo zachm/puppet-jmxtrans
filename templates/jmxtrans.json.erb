@@ -1,5 +1,5 @@
 <%
-(jmx_host, jmx_port) = jmx.split(':')
+(jmx_host, jmx_port) = @jmx.split(':')
 # if an attribute has these settings, they will be added to any
 # Ganglia output writter settings.
 valid_ganglia_settings = ['slope', 'units', 'tmax', 'dmax', 'sendMetadata']
