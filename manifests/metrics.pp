@@ -48,14 +48,14 @@ define jmxtrans::metrics(
     $statsd               = undef,
     $statsd_root_prefix   = undef,
     $outfile              = undef,
-    $json_dir             = '/etc/jmxtrans',
 )
 {
     include jmxtrans
+    $json_dir = $jmxtrans::json_dir
 
     file { "${json_dir}/${title}.json":
         content => template('jmxtrans/jmxtrans.json.erb'),
         notify  => Service['jmxtrans'],
-        require => Package['jmxtrans'],
+        require => [ Package['jmxtrans'], File[$json_dir] ]
     }
 }
