@@ -18,9 +18,10 @@ class jmxtrans(
     }
 
     file { $json_dir:
-        ensure => 'directory',
-        purge  => true,
-        force  => true,
+        ensure  => 'directory',
+        purge   => true,
+        force   => true,
+        recurse => true,
     }
 
     file { '/etc/default/jmxtrans':
