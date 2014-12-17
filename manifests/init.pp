@@ -32,6 +32,6 @@ class jmxtrans(
         ensure    => 'running',
         enable    => true,
         require   => Package['jmxtrans'],
-        subscribe => File['/etc/default/jmxtrans'],
+        subscribe => File['/etc/default/jmxtrans', $json_dir],
     }
 }
