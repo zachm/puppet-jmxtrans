@@ -15,6 +15,7 @@ class jmxtrans(
     $json_dir     = '/etc/jmxtrans',
 )
 {
+    validate_bool($installed)
     if $installed  == true {
         package { 'jmxtrans':
             ensure  => 'installed',
@@ -39,14 +40,16 @@ class jmxtrans(
         }
     } else {
         service { 'jmxtrans':
-            ensure => 'absent'
-        } ->
+            enable => false,
+            ensure => 'stopped'
+        }
         package { 'jmxtrans':
             ensure => 'purged',
         }
         file { $json_dir:
-            ensure => 'absent',
-            force  => 'true',
+            ensure  => 'absent',
+            force   => true,
+            recurse => true,
         }
         file { '/etc/default/jmxtrans':
             ensure => 'absent',
