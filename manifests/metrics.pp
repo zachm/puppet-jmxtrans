@@ -34,7 +34,8 @@
 # $statsd_root_prefix   - rootPrefix for statsd.          Optional.
 # $outfile              - local file path in which to save metric query results.  Optional.
 # $json_dir             - path to jmxtrans JSON config directory.  Default: /etc/jmxtrans.
-#
+# $ensure               - 'file' or 'absent', etc. Default: file.
+
 define jmxtrans::metrics(
     $jmx,
     $objects,
@@ -48,12 +49,14 @@ define jmxtrans::metrics(
     $statsd               = undef,
     $statsd_root_prefix   = undef,
     $outfile              = undef,
+    $ensure               = 'file',
 )
 {
     include jmxtrans
     $json_dir = $jmxtrans::json_dir
 
     file { "${json_dir}/${title}.json":
+        ensure  => $ensure,
         content => template('jmxtrans/jmxtrans.json.erb'),
         notify  => Service['jmxtrans'],
         require => [ Package['jmxtrans'], File[$json_dir] ]

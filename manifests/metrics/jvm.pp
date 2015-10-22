@@ -17,9 +17,11 @@ define jmxtrans::metrics::jvm(
     $graphite     = undef,
     $outfile      = undef,
     $group_prefix = '',
+    $ensure       = 'file',
 )
 {
     jmxtrans::metrics { "${title}-jvm-metrics":
+        ensure               => $ensure,
         jmx                  => $jmx,
         outfile              => $outfile,
         ganglia              => $ganglia,
